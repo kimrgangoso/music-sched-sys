@@ -1,5 +1,7 @@
 package com.corbcc.music_sched_sys.controller;
 
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.corbcc.music_sched_sys.domain.ChurchDetailsEntity;
@@ -17,13 +19,39 @@ public class AppController {
 	@Autowired
 	AppService appService;
 	
-	@RequestMapping(value = "/api/addchurchdetails", method = {RequestMethod.POST}, consumes = {
+	
+	@RequestMapping(value = "/api/saveChurchDetails", method = {RequestMethod.POST}, consumes = {
 	"application/json"}, produces = {"application/json"})
-	public ResponseEntity<?> addChurchDetails(@RequestBody ChurchDetailsDto body){
-		logger.info("Call addChurchDetails Service");
-		ResponseEntity<?> response =  appService.addChurchDetails(body);
-		logger.info("Call addChurchDetails Service ends");
+	public ResponseEntity<?> saveChurchDetails(@RequestBody ChurchDetailsDto body){
+		logger.info("Call saveChurchDetails Service");
+		ResponseEntity<?> response =  appService.saveChurchDetails(body);
+		logger.info("Call saveChurchDetails Service ends");
 		return response;
+	}
+	
+	@RequestMapping(value = "/api/viewChurchDetails", method = {RequestMethod.POST}, consumes = {
+	"application/json"}, produces = {"application/json"})
+	public ResponseEntity<?> viewChurchDetails(@RequestBody ChurchDetailsDto request){
+		logger.info("Call viewChurchDetails Service");
+		ResponseEntity<?> response =  appService.viewChurchDetails(request);
+		logger.info("Call viewChurchDetails Service ends");
+		return response;
+	}
+	
+	@RequestMapping(value = "/api/deleteChurchDetails", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> deleteChurchDetails(@RequestBody ChurchDetailsDto request) {
+        logger.info("Call deleteChurchDetails Service");
+        ResponseEntity<?> response = appService.deleteChurchDetails(request);
+        logger.info("Call deleteChurchDetails Service ends");
+        return response;
+    }
+
+	@RequestMapping(value = "/api/updateChurchDetails", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	public ResponseEntity<?> updateChurchDetails(@RequestBody ChurchDetailsDto body) {
+	    logger.info("Call updateChurchDetails Service");
+	    ResponseEntity<?> response = appService.updateChurchDetails(body);
+	    logger.info("Call updateChurchDetails Service ends");
+	    return response;
 	}
 }
 
