@@ -17,7 +17,7 @@ public class UserDetailsDto {
     private String lastname;
     private String email;
     private String password;
-    private String profileUpdatedBy;
+    private String userUpdatedBy;
     private Boolean accountEnabled;
     private Boolean passwordReset;
     private Integer failedLogin;

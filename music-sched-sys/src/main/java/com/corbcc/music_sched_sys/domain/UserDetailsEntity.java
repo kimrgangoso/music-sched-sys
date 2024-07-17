@@ -42,8 +42,8 @@ public class UserDetailsEntity {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "profile_updated_by")
-    private String profileUpdatedBy;
+    @Column(name = "user_updated_by")
+    private String userUpdatedBy;
 
     @Column(name = "account_enabled")
     private Boolean accountEnabled;

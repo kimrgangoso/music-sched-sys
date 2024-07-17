@@ -23,9 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Service
-public class AppService {
+public class ChurchDetailsService {
 	
-	public static final Logger logger = LoggerFactory.getLogger(AppService.class);
+	public static final Logger logger = LoggerFactory.getLogger(ChurchDetailsService.class);
 	
 	@Autowired
 	private ChurchDetailsRepository churchDtlsRepo;

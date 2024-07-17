@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -65,13 +66,87 @@ public class UserDetailsService {
             userDetailsEntity.setLastBadLogin(null);
             userDetailsEntity.setPasswordHistory(null);
             userDetailsEntity.setLastPasswordChange(null);
-            userDetailsEntity.setProfileUpdatedBy(null);
+            userDetailsEntity.setUserUpdatedBy(null);
             
             userDetailsRepo.save(userDetailsEntity);
 
             return ResponseEntity.status(HttpStatus.CREATED).body("User details added successfully!");
         } catch (Exception e) {
             logger.error("Error saving user details", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getLocalizedMessage());
+        }
+    }
+    
+    public ResponseEntity<?> updateUserDetails(UserDetailsDto request) {
+        try {
+            Optional<UserDetailsEntity> existingUserDetails = userDetailsRepo.findById(request.getId());
+            if (existingUserDetails.isPresent()) {
+                UserDetailsEntity userDetailsEntity = existingUserDetails.get();
+                userDetailsEntity.setUsername(request.getUsername());
+                userDetailsEntity.setFirstname(request.getFirstname());
+                userDetailsEntity.setLastname(request.getLastname());
+                userDetailsEntity.setEmail(request.getEmail());
+                userDetailsEntity.setMobileNumber(request.getMobileNumber());
+                userDetailsEntity.setUserUpdatedBy(request.getUserUpdatedBy());
+                userDetailsEntity.setChurchId(request.getChurchId());
+
+                userDetailsRepo.save(userDetailsEntity);
+                return ResponseEntity.status(HttpStatus.OK).body("User details updated successfully!");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getLocalizedMessage());
+        }
+    }
+    
+    public ResponseEntity<?> viewUserDetails() {
+        try {
+            List<UserDetailsEntity> userDetailsEntityList = userDetailsRepo.findAll();
+            List<UserDetailsDto> userDetailsDtoList = new ArrayList<>();
+
+            for (UserDetailsEntity entity : userDetailsEntityList) {
+                UserDetailsDto dto = new UserDetailsDto();
+                dto.setId(entity.getId());
+                dto.setUsername(entity.getUsername());
+                dto.setFirstname(entity.getFirstname());
+                dto.setLastname(entity.getLastname());
+                dto.setEmail(entity.getEmail());
+                dto.setUserUpdatedBy(entity.getUserUpdatedBy());
+                dto.setAccountEnabled(entity.getAccountEnabled());
+                dto.setPasswordReset(entity.getPasswordReset());
+                dto.setFailedLogin(entity.getFailedLogin());
+                dto.setLastGoodLogin(entity.getLastGoodLogin());
+                dto.setLastBadLogin(entity.getLastBadLogin());
+                dto.setPasswordHistory(entity.getPasswordHistory());
+                dto.setLastPasswordChange(entity.getLastPasswordChange());
+                dto.setUserDateCreated(entity.getUserDateCreated());
+                dto.setUserCreatedBy(entity.getUserCreatedBy());
+                dto.setPasswordChangeBy(entity.getPasswordChangeBy());
+                dto.setStatus(entity.getStatus());
+                dto.setMobileNumber(entity.getMobileNumber());
+                dto.setChurchId(entity.getChurchId());
+
+                userDetailsDtoList.add(dto);
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(userDetailsDtoList);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getLocalizedMessage());
+        }
+    }
+    
+    public ResponseEntity<?> deleteUserDetails(UserDetailsDto request) {
+        try {
+            Optional<UserDetailsEntity> userDetailsEntityOptional = userDetailsRepo.findById(request.getId());
+
+            if (userDetailsEntityOptional.isPresent()) {
+            	userDetailsRepo.deleteById(request.getId());
+                return ResponseEntity.status(HttpStatus.OK).body("User details deleted successfully!");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
+            }
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getLocalizedMessage());
         }
     }
