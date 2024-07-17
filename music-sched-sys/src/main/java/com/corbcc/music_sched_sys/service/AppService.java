@@ -1,8 +1,12 @@
 package com.corbcc.music_sched_sys.service;
 
 import com.corbcc.music_sched_sys.domain.ChurchDetailsEntity;
+import com.corbcc.music_sched_sys.domain.UserDetailsEntity;
 import com.corbcc.music_sched_sys.dto.ChurchDetailsDto;
+import com.corbcc.music_sched_sys.dto.UserDetailsDto;
 import com.corbcc.music_sched_sys.repository.ChurchDetailsRepository;
+import com.corbcc.music_sched_sys.repository.UserDetailsRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -25,10 +29,10 @@ public class AppService {
 	
 	@Autowired
 	private ChurchDetailsRepository churchDtlsRepo;
+    
+    @Autowired
+    UserDetailsRepository userDetailsRepo;
 
-	//*********************************************************************************************	
-	//***********************************CHURCH DETAILS SERVICES START*****************************
-	//*********************************************************************************************
 	public ResponseEntity<?> saveChurchDetails(ChurchDetailsDto request) {
 		ResponseEntity<?> msgresponse;
 		try {
@@ -115,8 +119,6 @@ public class AppService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getLocalizedMessage());
         }
     }
-	
-	//*********************************************************************************************	
-	//***********************************CHURCH DETAILS SERVICES END*******************************
-	//*********************************************************************************************
+
+
 }
