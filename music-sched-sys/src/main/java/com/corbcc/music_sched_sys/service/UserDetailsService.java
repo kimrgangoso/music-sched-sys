@@ -6,11 +6,13 @@ import com.corbcc.music_sched_sys.dto.ChurchDetailsDto;
 import com.corbcc.music_sched_sys.dto.UserDetailsDto;
 import com.corbcc.music_sched_sys.repository.ChurchDetailsRepository;
 import com.corbcc.music_sched_sys.repository.UserDetailsRepository;
+import com.corbcc.music_sched_sys.util.HashUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,15 +30,25 @@ public class UserDetailsService {
 	public static final Logger logger = LoggerFactory.getLogger(UserDetailsService.class); 
     @Autowired
     UserDetailsRepository userDetailsRepo;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public ResponseEntity<?> saveUserDetails(UserDetailsDto request) {
         try {
+        
             UserDetailsEntity userDetailsEntity = new UserDetailsEntity();
+            
+            //Password Encryption
+            String hashedPassword = HashUtil.hashPassword(request.getPassword()); // Hash the password
+            String encodedPassword = passwordEncoder.encode(request.getPassword());
+            
+            //Input Values
             userDetailsEntity.setUsername(request.getUsername());
             userDetailsEntity.setFirstname(request.getFirstname());
             userDetailsEntity.setLastname(request.getLastname());
             userDetailsEntity.setEmail(request.getEmail());
-            userDetailsEntity.setPassword(request.getPassword());
+            userDetailsEntity.setPassword(encodedPassword);
             userDetailsEntity.setMobileNumber(request.getMobileNumber());
             userDetailsEntity.setChurchId(request.getChurchId());
             userDetailsEntity.setUserCreatedBy(request.getUserCreatedBy()); 
