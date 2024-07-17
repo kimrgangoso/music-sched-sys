@@ -6,9 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.corbcc.music_sched_sys.domain.ChurchDetailsEntity;
 import com.corbcc.music_sched_sys.dto.ChurchDetailsDto;
+import com.corbcc.music_sched_sys.dto.RoleDto;
 import com.corbcc.music_sched_sys.dto.UserDetailsDto;
+import com.corbcc.music_sched_sys.dto.UserRoleDto;
 import com.corbcc.music_sched_sys.service.ChurchDetailsService;
+import com.corbcc.music_sched_sys.service.RoleService;
 import com.corbcc.music_sched_sys.service.UserDetailsService;
+import com.corbcc.music_sched_sys.service.UserRoleService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +28,13 @@ public class AppController {
 	
 	@Autowired
     UserDetailsService userDetailsService;
+	
+	@Autowired
+    RoleService roleService;
+	
+	@Autowired
+    UserRoleService userRoleService;
+
 	
 	//*********************************************************************************************	
 	//***********************************CHURCH DETAILS SERVICES **********************************
@@ -92,6 +103,52 @@ public class AppController {
         return response;
     }
   
+	//*********************************************************************************************	
+	//***********************************ROLE DETAILS SERVICES ************************************
+	//*********************************************************************************************
+	@RequestMapping(value = "/api/roleDetails/view", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> viewRoleDetails() {
+        logger.info("Call viewRoleDetails Service");
+        ResponseEntity<?> response = roleService.viewRoleDetails();
+        logger.info("Call viewRoleDetails Service ends");
+        return response;
+    }
+	@RequestMapping(value = "/api/roleDetails/save", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> saveRoleDetails(@RequestBody RoleDto request) {
+        logger.info("Call saveRoleDetails Service");
+        ResponseEntity<?> response = roleService.saveRoleDetails(request);
+        logger.info("Call saveRoleDetails Service ends");
+        return response;
+    }
+    @RequestMapping(value = "/api/roleDetails/update", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> updateRoleDetails(@RequestBody RoleDto request) {
+        logger.info("Call updateRoleDetails Service");
+        ResponseEntity<?> response = roleService.updateRoleDetails(request);
+        logger.info("Call updateRoleDetails Service ends");
+        return response;
+    }
+    @RequestMapping(value = "/api/roleDetails/delete", method = RequestMethod.POST, produces = "application/json")
+    public ResponseEntity<?> deleteRoleDetails(@RequestBody RoleDto request) {
+        logger.info("Call deleteRoleDetails Service");
+        ResponseEntity<?> response = roleService.deleteRoleDetails(request);
+        logger.info("Call deleteRoleDetails Service ends");
+        return response;
+    }
+    //*********************************************************************************************	
+  	//***********************************USER ROLE  SERVICES **************************************
+  	//*********************************************************************************************
+    @RequestMapping(value = "/api/userRoles/assign", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> assignRoles(@RequestBody UserRoleDto request) {
+        return userRoleService.assignRoles(request);
+    }
+    
+    
+   
+    @RequestMapping(value = "/api/userRoles/view", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> viewUserRoles(@RequestBody UserRoleDto request) {
+        return userRoleService.viewUserRoles(request.getUserId());
+    }
+
 	
 }
 
