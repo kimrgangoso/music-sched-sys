@@ -7,15 +7,18 @@ import org.slf4j.LoggerFactory;
 import com.corbcc.music_sched_sys.domain.ChurchDetailsEntity;
 import com.corbcc.music_sched_sys.dto.ChurchDetailsDto;
 import com.corbcc.music_sched_sys.dto.LoginDto;
+import com.corbcc.music_sched_sys.dto.ProfileDetailsDto;
 import com.corbcc.music_sched_sys.dto.RoleDto;
 import com.corbcc.music_sched_sys.dto.UserDetailsDto;
 import com.corbcc.music_sched_sys.dto.UserRoleDto;
 import com.corbcc.music_sched_sys.service.ChurchDetailsService;
+import com.corbcc.music_sched_sys.service.ProfileService;
 import com.corbcc.music_sched_sys.service.RoleService;
 import com.corbcc.music_sched_sys.service.UserDetailsService;
 import com.corbcc.music_sched_sys.service.UserRoleService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +38,9 @@ public class AppController {
 	
 	@Autowired
     UserRoleService userRoleService;
-
+	  
+	@Autowired
+	ProfileService profileService;
 	
 	//*********************************************************************************************	
 	//***********************************CHURCH DETAILS SERVICES **********************************
@@ -162,6 +167,39 @@ public class AppController {
     	logger.info("Call viewUserRoles Service ends");
     	return response;
     }
-	
+    //*********************************************************************************************	
+  	//***********************************PROFILE SERVICES *****************************************
+  	//*********************************************************************************************
+  
+    @RequestMapping(value = "/api/profileDetails/create", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> createProfile(@RequestBody ProfileDetailsDto request) {
+        logger.info("Call createProfile Service");    
+        ResponseEntity<?> response = profileService.saveProfile(request);
+        logger.info("Call createProfile Service ends");
+        return response;
+    }
+    @RequestMapping(value = "/api/profileDetails/update", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> updateProfile(@RequestBody ProfileDetailsDto request) {
+        // Validate profileId
+        if (request.getProfileId() == null) {
+            logger.error("Profile ID is required");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Profile ID is required");
+        }
+        // Validate other fields if needed
+        // Example: if (request.getProfileName() == null) { ... }
+        logger.info("Update Profile request for profileId: {}", request.getProfileId());       
+        // Process update profile request
+        ResponseEntity<?> response = profileService.updateProfile(request);     
+        logger.info("Update Profile request processed for profileId: {}", request.getProfileId());
+        return response;
+    }
+    @RequestMapping(value = "/api/profileDetails/view", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> viewProfile(@RequestBody ProfileDetailsDto request) {
+        UUID profileId = request.getProfileId();
+        logger.info("Calling viewProfile Service for profileId: {}", profileId);
+        ResponseEntity<?> response = profileService.viewProfile(profileId);
+        logger.info("ViewProfile Service call ends");
+        return response;
+    }
 }
 
