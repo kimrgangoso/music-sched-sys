@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.corbcc.music_sched_sys.domain.ChurchDetailsEntity;
 import com.corbcc.music_sched_sys.dto.ChurchDetailsDto;
+import com.corbcc.music_sched_sys.dto.LoginDto;
 import com.corbcc.music_sched_sys.dto.RoleDto;
 import com.corbcc.music_sched_sys.dto.UserDetailsDto;
 import com.corbcc.music_sched_sys.dto.UserRoleDto;
@@ -139,16 +140,28 @@ public class AppController {
   	//*********************************************************************************************
     @RequestMapping(value = "/api/userRoles/assign", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> assignRoles(@RequestBody UserRoleDto request) {
-        return userRoleService.assignRoles(request);
-    }
-    
-    
-   
+    	logger.info("Call assignRoles Service");
+    	ResponseEntity<?> response = userRoleService.assignRoles(request);
+    	logger.info("Call assignRoles Service ends");
+    	return response;
+    } 
     @RequestMapping(value = "/api/userRoles/view", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> viewUserRoles(@RequestBody UserRoleDto request) {
-        return userRoleService.viewUserRoles(request.getUserId());
+    	logger.info("Call viewUserRoles Service");
+    	ResponseEntity<?> response =  userRoleService.viewUserRoles(request.getUserId());
+        logger.info("Call viewUserRoles Service ends");
+    	return response;
     }
-
+    //*********************************************************************************************	
+  	//***********************************LOGIN SERVICE ********************************************
+  	//*********************************************************************************************
+    @RequestMapping(value = "/api/login", method = {RequestMethod.POST}, consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> login(@RequestBody LoginDto request) {
+    	logger.info("Call viewUserRoles Service");
+    	ResponseEntity<?> response = userDetailsService.loginUser(request);
+    	logger.info("Call viewUserRoles Service ends");
+    	return response;
+    }
 	
 }
 

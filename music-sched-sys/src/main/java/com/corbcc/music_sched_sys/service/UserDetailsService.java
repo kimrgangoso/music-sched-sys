@@ -3,6 +3,7 @@ package com.corbcc.music_sched_sys.service;
 import com.corbcc.music_sched_sys.domain.ChurchDetailsEntity;
 import com.corbcc.music_sched_sys.domain.UserDetailsEntity;
 import com.corbcc.music_sched_sys.dto.ChurchDetailsDto;
+import com.corbcc.music_sched_sys.dto.LoginDto;
 import com.corbcc.music_sched_sys.dto.UserDetailsDto;
 import com.corbcc.music_sched_sys.repository.ChurchDetailsRepository;
 import com.corbcc.music_sched_sys.repository.UserDetailsRepository;
@@ -148,6 +149,18 @@ public class UserDetailsService {
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getLocalizedMessage());
+        }
+    }
+    
+    public ResponseEntity<?> loginUser(LoginDto request) {
+        try {
+            UserDetailsEntity user = userDetailsRepo.findByUsername(request.getUsername());
+            if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+                return ResponseEntity.status(401).body("Invalid username or password!");
+            }
+            return ResponseEntity.ok("Login successful!");
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(e.getLocalizedMessage());
         }
     }
 

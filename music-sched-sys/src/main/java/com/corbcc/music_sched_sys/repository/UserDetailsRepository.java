@@ -10,6 +10,9 @@ import java.util.UUID;
 @Repository
 public interface UserDetailsRepository extends JpaRepository<UserDetailsEntity, UUID> {
 	
+	UserDetailsEntity findByUsername(String username);
+	
+	
 	@Transactional
 	void deleteById(UUID id);
 }
