@@ -61,9 +61,6 @@ public class ProfileService {
     @Autowired
     private MainModuleRepository mainModuleRepository;
     
-    private final JdbcTemplate jdbcTemplate;
-    private final EntityManager entityManager;
-
     @Transactional
     public ResponseEntity<?> saveProfile(ProfileDetailsDto request) {
         try {
@@ -107,15 +104,13 @@ public class ProfileService {
             }
 
             logger.info("Profile created successfully: {}", profileDetailsEntity.getId());
-            return ResponseEntity.ok("Profile created successfully");
+            return ResponseEntity.ok("Profile created successfully!");
         } catch (Exception e) {
             logger.error("Failed to create profile: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to create profile: " + e.getMessage());
         }
     }
-
-
 
     @Transactional
     public ResponseEntity<?> updateProfile(ProfileDetailsDto request) {
@@ -165,15 +160,13 @@ public class ProfileService {
             }
 
             logger.info("Profile updated successfully: {}", profileDetailsEntity.getId());
-            return ResponseEntity.ok("Profile updated successfully");
+            return ResponseEntity.ok("Profile updated successfully!");
         } catch (Exception e) {
             logger.error("Failed to update profile: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update profile: " + e.getMessage());
         }
     }
 
-    
-   
     @Transactional(readOnly = true)
     public ResponseEntity<?> viewProfile(UUID profileId) {
         if (profileId == null) {

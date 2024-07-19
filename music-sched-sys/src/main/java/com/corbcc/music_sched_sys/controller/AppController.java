@@ -1,5 +1,6 @@
 package com.corbcc.music_sched_sys.controller;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import com.corbcc.music_sched_sys.service.ChurchDetailsService;
 import com.corbcc.music_sched_sys.service.ProfileService;
 import com.corbcc.music_sched_sys.service.RoleService;
 import com.corbcc.music_sched_sys.service.UserDetailsService;
+import com.corbcc.music_sched_sys.service.UserProfilesService;
 import com.corbcc.music_sched_sys.service.UserRoleService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,9 @@ public class AppController {
 	  
 	@Autowired
 	ProfileService profileService;
+	
+	@Autowired
+	UserProfilesService userProfilesService;
 	
 	//*********************************************************************************************	
 	//***********************************CHURCH DETAILS SERVICES **********************************
@@ -170,7 +175,6 @@ public class AppController {
     //*********************************************************************************************	
   	//***********************************PROFILE SERVICES *****************************************
   	//*********************************************************************************************
-  
     @RequestMapping(value = "/api/profileDetails/create", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> createProfile(@RequestBody ProfileDetailsDto request) {
         logger.info("Call createProfile Service");    
@@ -186,7 +190,6 @@ public class AppController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Profile ID is required");
         }
         // Validate other fields if needed
-        // Example: if (request.getProfileName() == null) { ... }
         logger.info("Update Profile request for profileId: {}", request.getProfileId());       
         // Process update profile request
         ResponseEntity<?> response = profileService.updateProfile(request);     
@@ -203,7 +206,35 @@ public class AppController {
     }
     @RequestMapping(value = "/api/profileMenu/view", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> getMainModules() {
-        return profileService.getAllMainModules();
+    	logger.info("Call viewMenus Service");
+    	ResponseEntity<?> response = profileService.getAllMainModules();
+        logger.info("Call viewMenus Service end");
+        return response;
     }
+  //*********************************************************************************************	
+  //***********************************USER PROFILE SERVICES ************************************
+  //*********************************************************************************************
+   @RequestMapping(value = "/api/userProfiles/assign", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> assignProfilesToUser(@RequestBody UserDetailsDto request) {
+	   logger.info("Call viewUserRoles Service");
+	   ResponseEntity<?> response = userProfilesService.assignProfilesToUser(request);
+       logger.info("Call viewUserRoles Service end ");
+       return response;
+    }
+   @RequestMapping(value = "/api/userProfiles/view", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+   public ResponseEntity<?> viewUserProfiles(@RequestBody(required = false) Map<String, UUID> requestBody) {
+       UUID userId = (requestBody != null) ? requestBody.get("userId") : null;
+       logger.info("Call viewUserProfiles Service");
+       ResponseEntity<?> response = userProfilesService.viewUserProfiles(userId);
+       logger.info("Call viewUserProfiles Service end");
+       return response;
+   }
+   @RequestMapping(value = "/api/userProfiles/update", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+   public ResponseEntity<?> updateProfilesForUser(@RequestBody UserDetailsDto request) {
+	   logger.info("Call updateUserRoles Service");
+	   ResponseEntity<?> response = userProfilesService.updateProfilesForUser(request);
+      logger.info("Call updateUserRoles Service end ");
+      return response;
+   }
 }
 
