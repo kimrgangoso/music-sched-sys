@@ -37,7 +37,7 @@ public class ActionEntity {
     private String description;
     
     @Column(name = "module_id")
-    private String moduleId;
+    private UUID moduleId;
     
 
 

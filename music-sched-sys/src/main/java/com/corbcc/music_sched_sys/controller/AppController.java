@@ -201,5 +201,9 @@ public class AppController {
         logger.info("ViewProfile Service call ends");
         return response;
     }
+    @RequestMapping(value = "/api/profileMenu/view", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> getMainModules() {
+        return profileService.getAllMainModules();
+    }
 }
 

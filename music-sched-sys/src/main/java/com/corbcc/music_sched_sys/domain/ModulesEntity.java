@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
@@ -35,6 +36,9 @@ public class ModulesEntity {
     private String description;
 
     @Column(name = "mainmodule_id")
-    private String mainModuleId;
+    private UUID mainModuleId;
+    
+    @ManyToOne
+    private MainModuleEntity mainModule;
 
 }

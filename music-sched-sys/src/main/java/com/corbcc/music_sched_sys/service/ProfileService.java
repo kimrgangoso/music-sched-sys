@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,13 +25,23 @@ import com.corbcc.music_sched_sys.domain.ModulesEntity;
 import com.corbcc.music_sched_sys.domain.ProfileDetailsEntity;
 import com.corbcc.music_sched_sys.domain.ProfileModulesEntity;
 import com.corbcc.music_sched_sys.dto.ProfileModuleDto;
+import com.corbcc.music_sched_sys.dto.ActionDto;
+import com.corbcc.music_sched_sys.dto.MainModuleDto;
+import com.corbcc.music_sched_sys.dto.ModuleDto;
 import com.corbcc.music_sched_sys.dto.ProfileDetailsDto;
+import com.corbcc.music_sched_sys.dto.ProfileMenuDto;
 import com.corbcc.music_sched_sys.repository.ActionsRepository;
+import com.corbcc.music_sched_sys.repository.MainModuleRepository;
 import com.corbcc.music_sched_sys.repository.ModulesRepository;
 import com.corbcc.music_sched_sys.repository.ProfileModuleRepository;
 import com.corbcc.music_sched_sys.repository.ProfileRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class ProfileService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProfileService.class);
@@ -46,6 +57,12 @@ public class ProfileService {
 
     @Autowired
     private ActionsRepository actionsRepository;
+    
+    @Autowired
+    private MainModuleRepository mainModuleRepository;
+    
+    private final JdbcTemplate jdbcTemplate;
+    private final EntityManager entityManager;
 
     @Transactional
     public ResponseEntity<?> saveProfile(ProfileDetailsDto request) {
@@ -72,7 +89,7 @@ public class ProfileService {
                             .orElseThrow(() -> new RuntimeException("Action not found for ID: " + actionId));
 
                     // Check if action belongs to the module
-                    if (actionsEntity.getModuleId().equals(moduleId)) {
+                    if (actionsEntity.getModuleId().equals(UUID.fromString(moduleId))) {
                         // Create profile modules entity
                         ProfileModulesEntity profileModulesEntity = new ProfileModulesEntity();
                         profileModulesEntity.setProfile(profileDetailsEntity);
@@ -130,7 +147,7 @@ public class ProfileService {
                             .orElseThrow(() -> new RuntimeException("Action not found for ID: " + actionId));
 
                     // Validate that action belongs to the module (optional, if required)
-                    if (!actionsEntity.getModuleId().equals(moduleId)) {
+                    if (!actionsEntity.getModuleId().equals(UUID.fromString(moduleId))) {
                         logger.warn("Action {} does not belong to module {}, skipping...", actionId, moduleId);
                         continue; // Skip saving this action if it doesn't belong to the module
                     }
@@ -236,7 +253,63 @@ public class ProfileService {
         }
     }
 
+    public ResponseEntity<?> getAllMainModules() {
+        try {
+            List<Object[]> results = mainModuleRepository.findAllMainModuleWithModulesAndActions();
 
+            // Transform the result to a suitable DTO
+            Map<UUID, MainModuleDto> mainModuleMap = new HashMap<>();
+
+            for (Object[] row : results) {
+                UUID mainModuleId = (UUID) row[0];
+                String mainModuleName = (String) row[1];
+                UUID moduleId = (UUID) row[2];
+                String moduleName = (String) row[3];
+                String moduleDescription = (String) row[4];
+                UUID actionId = (UUID) row[5];
+                String actionName = (String) row[6];
+                String actionDescription = (String) row[7];
+
+                MainModuleDto mainModuleDto = mainModuleMap.computeIfAbsent(mainModuleId, id -> {
+                    MainModuleDto dto = new MainModuleDto();
+                    dto.setId(id);
+                    dto.setMenu(mainModuleName);
+                    dto.setModules(new ArrayList<>());
+                    return dto;
+                });
+
+                if (moduleId != null) {
+                    ModuleDto moduleDto = mainModuleDto.getModules().stream()
+                            .filter(m -> m.getId().equals(moduleId))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (moduleDto == null) {
+                        moduleDto = new ModuleDto();
+                        moduleDto.setId(moduleId);
+                        moduleDto.setModule(moduleName);
+                        moduleDto.setDescription(moduleDescription);
+                        moduleDto.setActions(new ArrayList<>());
+                        mainModuleDto.getModules().add(moduleDto);
+                    }
+
+                    if (actionId != null) {
+                        ActionDto actionDto = new ActionDto();
+                        actionDto.setId(actionId);
+                        actionDto.setAction(actionName);
+                        actionDto.setDescription(actionDescription);
+                        moduleDto.getActions().add(actionDto);
+                    }
+                }
+            }
+
+            List<MainModuleDto> mainModuleDtos = new ArrayList<>(mainModuleMap.values());
+            return ResponseEntity.ok(mainModuleDtos);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to retrieve main modules: " + e.getMessage());
+        }
+    }
 
 
     
