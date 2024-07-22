@@ -12,6 +12,8 @@ public interface UserDetailsRepository extends JpaRepository<UserDetailsEntity, 
 	
 	UserDetailsEntity findByUsername(String username);
 	
+	UserDetailsEntity findByUsernameIgnoreCase(String username);
+	
 	
 	@Transactional
 	void deleteById(UUID id);

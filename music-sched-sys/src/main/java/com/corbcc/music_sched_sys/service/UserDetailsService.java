@@ -2,12 +2,17 @@ package com.corbcc.music_sched_sys.service;
 
 import com.corbcc.music_sched_sys.domain.ChurchDetailsEntity;
 import com.corbcc.music_sched_sys.domain.UserDetailsEntity;
+import com.corbcc.music_sched_sys.domain.UserProfilesEntity;
 import com.corbcc.music_sched_sys.dto.ChurchDetailsDto;
 import com.corbcc.music_sched_sys.dto.LoginDto;
+import com.corbcc.music_sched_sys.dto.LoginSuccessResponseDto;
 import com.corbcc.music_sched_sys.dto.UserDetailsDto;
 import com.corbcc.music_sched_sys.repository.ChurchDetailsRepository;
 import com.corbcc.music_sched_sys.repository.UserDetailsRepository;
+import com.corbcc.music_sched_sys.repository.UserProfilesRepository;
 import com.corbcc.music_sched_sys.util.HashUtil;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,8 +22,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -32,6 +41,9 @@ public class UserDetailsService {
 	public static final Logger logger = LoggerFactory.getLogger(UserDetailsService.class); 
     @Autowired
     UserDetailsRepository userDetailsRepo;
+    
+    @Autowired
+    UserProfilesRepository userProfilesRepo;
     
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -153,8 +165,60 @@ public class UserDetailsService {
     }
     
     public ResponseEntity<?> loginUser(LoginDto request) {
+    	
+    	Gson gson = new Gson();
+    	JsonObject details = new JsonObject();
+    	details.addProperty("userName", request.getUsername());
         try {
-            UserDetailsEntity user = userDetailsRepo.findByUsername(request.getUsername());
+        	
+        	logger.info("logIn Request: " + details);
+        	if (request.getUsername().isEmpty() || request.getPassword().isEmpty()) {
+        		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username and Password is required.");
+        	}
+            UserDetailsEntity user = userDetailsRepo.findByUsernameIgnoreCase(request.getUsername());
+            if (user != null) {
+            	String firstname = user.getFirstname() == null ? "" : user.getFirstname().trim();
+            	String lastname = user.getLastname() == null ? "" : user.getLastname().trim();
+            	
+            	details.addProperty("fullName", lastname + ", " + firstname);
+            	
+            	if(user.getStatus().equals("LOCKED")) {
+            		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is locked.");
+            	}
+            	
+            	if(user.getStatus().equals("ACTIVE")) {     		
+            		if(passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            			
+            			//set Failed Logins to zero. update last good login.
+						user.setFailedLogin(0);
+						user.setLastGoodLogin(new Timestamp(new Date().getTime()));
+						userDetailsRepo.save(user);
+						
+						//get User Profiles
+						List<UserProfilesEntity> userProfiles = userProfilesRepo.findByUserId(user.getId());
+									
+						// Collect profile IDs directly
+						List<UUID> profileIdList = userProfiles.stream()
+						    .map(profile -> profile.getProfile().getId())
+						    .distinct() // Remove duplicates if needed
+						    .collect(Collectors.toList());
+						
+						LoginSuccessResponseDto response = new LoginSuccessResponseDto(user.getUsername(), user.getFirstname(), user.getLastname(), user.getStatus(), profileIdList);
+						return ResponseEntity.ok(gson.toJson(response));
+            			
+            		}else {					
+						return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid UserName or Password.");
+					}       		
+           		
+            	}
+            	
+            	
+            	
+            	
+            	
+            	
+            	
+            }
             if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
                 return ResponseEntity.status(401).body("Invalid username or password!");
             }

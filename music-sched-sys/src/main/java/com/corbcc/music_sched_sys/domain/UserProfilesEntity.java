@@ -33,6 +33,5 @@ public class UserProfilesEntity {
 
     @Column(name = "profile_name", nullable = false)
     private String profileName;
-    
-
+  
 }
