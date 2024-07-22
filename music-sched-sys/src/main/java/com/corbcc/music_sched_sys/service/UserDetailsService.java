@@ -1,5 +1,6 @@
 package com.corbcc.music_sched_sys.service;
 
+import com.corbcc.music_sched_sys.config.AppConfig;
 import com.corbcc.music_sched_sys.domain.ChurchDetailsEntity;
 import com.corbcc.music_sched_sys.domain.UserDetailsEntity;
 import com.corbcc.music_sched_sys.domain.UserProfilesEntity;
@@ -44,6 +45,9 @@ public class UserDetailsService {
     
     @Autowired
     UserProfilesRepository userProfilesRepo;
+    
+    @Autowired
+    AppConfig config;
     
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -207,24 +211,30 @@ public class UserDetailsService {
 						return ResponseEntity.ok(gson.toJson(response));
             			
             		}else {					
-						return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid UserName or Password.");
+            			int cnt = 0;
+            			cnt = user.getFailedLogin() + 1;
+            			int loginAttemptLimit = config.getLoginAttemptLimit();
+            			if (loginAttemptLimit == cnt) {
+            				user.setStatus("LOCKED");
+            			}
+            			//update Failed Login Attempts and Last Bad Login
+						user.setFailedLogin(cnt);
+						user.setLastBadLogin(new Timestamp(new Date().getTime()));
+						userDetailsRepo.save(user);
+            						
+            			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid UserName or Password.");
 					}       		
-           		
-            	}
+
             	
-            	
-            	
-            	
-            	
-            	
-            	
-            }
-            if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                return ResponseEntity.status(401).body("Invalid username or password!");
-            }
-            return ResponseEntity.ok("Login successful!");
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body(e.getLocalizedMessage());
+	            }else {
+	            	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Account is disabled.");
+	            }
+	        }else {
+	        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid UserName or Password.");
+	        }
+        }catch (Exception e) {
+        	logger.error("Login Service - ERROR: " + e.getLocalizedMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getLocalizedMessage());
         }
     }
 

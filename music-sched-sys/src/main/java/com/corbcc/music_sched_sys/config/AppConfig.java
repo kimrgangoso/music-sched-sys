@@ -13,4 +13,8 @@ import lombok.NoArgsConstructor;
 @Component
 public class AppConfig {
     // Configuration beans or methods can be added here if needed
+	
+	@Value(value = "${login.attempt.limit}")
+	private int loginAttemptLimit;
+
 }
